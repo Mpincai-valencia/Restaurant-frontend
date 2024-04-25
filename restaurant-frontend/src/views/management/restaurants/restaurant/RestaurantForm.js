@@ -26,9 +26,14 @@ const RestaurantForm=()=>{
         }
         const getCities= async(departmentId)=>{
             const response= await Axios({url:`http://localhost:1336/api/listcities/${departmentId}`});
-            const listcities= Object.keys
+            const listcities= Object.keys(response.data).map(i=> response.data[i]);
+            setCities(lstCities.flat());
         } 
-    },[deptoSeleccionado]);
+        getDepartments();
+
+        if(selectedDepartment !== "")
+            getCities(selectedDepartment);
+    },[selectedDepartment]);
 
     function handleSelectDepartments(event){
         setSelectedDepartment(event.target.value);
