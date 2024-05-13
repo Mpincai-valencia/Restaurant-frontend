@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import Axios  from 'axios'
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Axios  from 'axios';
 import {
   CButton,
   CTable,
@@ -16,6 +17,7 @@ import { func } from 'prop-types'
 const Restaurant = () => {
 
   const [restaurantData, setRestaurantData]=useState([]);
+  const navigate=useNavigate();
   useEffect(()=>{
     const getRestaurants=async()=>{
       const response= await Axios({
@@ -27,7 +29,21 @@ const Restaurant = () => {
     getRestaurants();
   },[]);
   function handleCreateRestaurnat(event){
+    navigate('/restaurants/restaurantform');
   } 
+  const handleDisable=async(restaurantId)=>{
+    try{
+      var url="http://localhost:1336/api/disablerestaurant/"+restaurantId;
+      const response= await Axios.put(url);
+      window.location.reload();
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
+  function handleEdit(restaurantId){
+    navigate(`/restaurants/restauranteditform/${restaurantId}`);
+  }
 
   const columns=[
     {
@@ -52,9 +68,7 @@ const Restaurant = () => {
     },
     {
       title: 'Options',
-      render: (text,record)=>(
-        <div></div>
-      )
+      dataIndex: 'Options'
     }
   ]
   return (
@@ -72,11 +86,19 @@ const Restaurant = () => {
             {restaurantData.map((restaurant,index)=>(
               <CTableRow key={index}>
                 {columns.map((column,columnIndex)=>(
-                  <CTableDataCell key={columnIndex}>{restaurant[column.dataIndex]}</CTableDataCell>
+                  <CTableDataCell key={columnIndex}>
+                    {column.dataIndex === 'Options' ? (
+                      <>
+                        <CButton onClick={() => handleEdit(restaurant.restaurantId)} color="primary">Edit</CButton>
+                        <CButton onClick={() => handleDisable(restaurant.restaurantId)} color="secondary">Disable</CButton>
+                      </>
+                    ):(
+                      restaurant[column.dataIndex]
+                  )}
+                  </CTableDataCell>
                 ))}
               </CTableRow>
-            ))
-            }
+            ))}
         </CTableBody>
       </CTable>
     </div>

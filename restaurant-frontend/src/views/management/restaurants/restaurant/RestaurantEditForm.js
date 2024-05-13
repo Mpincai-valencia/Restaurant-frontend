@@ -1,10 +1,15 @@
-import { CButton, CCol, CForm, CFormInput, CFormSelect } from "@coreui/react";
 import React, {useEffect, useState} from "react";
-import { useNavigate } from "react-router-dom";
-import Axios from 'axios'
+import { useNavigate, useParams } from 'react-router-dom';
+import Axios from "axios";
+import{ CForm,
+        CCol,
+        CFormInput,
+        CFormSelect,
+        CButton }from '@coreui/react'
 
+const RestaurantEditForm=()=>{
 
-const RestaurantForm=()=>{
+    const{restaurantId}=useParams();
     const [restaurantData, setRestaurantData]=useState({
         restaurantName:'',
         restaurantNit:'',
@@ -20,6 +25,13 @@ const RestaurantForm=()=>{
     const navigate = useNavigate();
 
     useEffect(()=>{
+
+
+        const getRestaurant=async()=>{
+            const response= await Axios({url:`http://localhost:1336/api/getrestaurant/${restaurantId}`});
+            const restaurant= response.data.data
+            setRestaurantData(restaurant)
+        }
         const getDepartments=async()=>{
             const response=await Axios({url:'http://localhost:1336/api/listdepartments'});
             const listdepartments=Object.keys(response.data).map(i=>response.data[i]);
@@ -30,6 +42,7 @@ const RestaurantForm=()=>{
             const listcities= Object.keys(response.data).map(i=> response.data[i]);
             setCities(listcities.flat());
         } 
+        getRestaurant();
         getDepartments();
 
         if(selectedDepartment !== "")
@@ -59,8 +72,7 @@ const RestaurantForm=()=>{
     const handleSubmit = async(event)=>{
         event.preventDefault();
         try{
-            const response = await Axios.post('http://localhost:1336/api/createrestaurant', restaurantData);
-            console.log(response.data);
+            const response = await Axios.put(`http://localhost:1336/api/updaterestaurant/${restaurantId}`, restaurantData);
             navigate('/restaurants/restaurant');
         }
         catch (e){
@@ -99,16 +111,16 @@ const RestaurantForm=()=>{
                 <CFormInput type="text" id="restaurantAddress" name="restaurantAddress" label="Address" value={restaurantData.restaurantAddress} onChange={handleChange} />
             </CCol>
             <CCol md={12}>
-                <CFormInput type="text" id="restaurantPhone" name="restaurantPhone" label="Phone" value={restaurantData.restuarantPhone} onChange={handleChange} />
+                <CFormInput type="text" id="restaurantPhone" name="restaurantPhone" label="Phone" value={restaurantData.restaurantPhone} onChange={handleChange} />
             </CCol>
             <CCol xs={12}>
                 <CButton onClick={handleSubmit} color="primary" type="submit"> Save</CButton>
             </CCol>
             <CCol xs={12}>
-                <CButton onClick={handleReturnPP} color="primary"> Cancel</CButton>
+                <CButton onClick={handleReturnPP} color="primary" type="submit"> Cancel</CButton>
             </CCol>
         </CForm>
     )
 }
 
-export default RestaurantForm
+export default RestaurantEditForm
